@@ -19,15 +19,18 @@
     ul { padding-left: 20px; line-height: 1.6; }
     li { margin-bottom: 6px; }
     input[type="file"] { display: block; margin: 12px 0; }
-    .image-preview { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 12px; }
-    .image-preview img { max-width: 100%; width: 220px; border: 1px solid #d0d7de; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-    .image-actions { margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap; }
+    input[type="text"], textarea { font: inherit; }
+    .image-preview { margin-top: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+    .image-item { border: 1px solid #d0d7de; border-radius: 10px; padding: 10px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .image-item img { width: 100%; height: auto; border-radius: 8px; display: block; }
+    .image-caption { margin-top: 8px; font-size: 13px; color: #57606a; }
+    .image-actions { margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap; }
     .secondary-btn { background: #6e7781; }
     .secondary-btn:hover { background: #57606a; }
     .danger-btn { background: #cf222e; }
     .danger-btn:hover { background: #a40e26; }
-    .posted-image-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 14px; }
-    .posted-image-grid img { width: 100%; height: auto; border-radius: 8px; border: 1px solid #d0d7de; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .oznamy-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 14px; }
+    .oznamy-gallery .image-item { padding: 8px; }
   </style>
 </head>
 <body>
@@ -64,7 +67,7 @@
     <div class="card">
       <h2>📢 Verejné oznamy</h2>
       <p>Vitajte na informačnej stránke odboru. Učebné texty, podklady a zadania cvičení sú prístupné v chránenej zóne nižšie.</p>
-      <div id="oznamyObrazky" class="posted-image-grid"></div>
+      <div id="oznamyObrazky" class="oznamy-gallery"></div>
     </div>
 
     <div class="card">
@@ -102,13 +105,26 @@
       </ul>
 
       <div style="margin-top: 20px; padding: 16px; border: 1px dashed #d0d7de; border-radius: 8px; background: #f6f8fa;">
-        <h3 style="margin-top: 0;">🖼️ Vložiť obrázky</h3>
-        <p style="margin-top: 0;">Vyberte jeden alebo viac obrázkov, ktoré sa zobrazia pod oznamami:</p>
+        <h3 style="margin-top: 0;">🖼️ Pridať obrázok žiaka</h3>
+        <p style="margin-top: 0;">Vyplň meno, popis a vyber jeden alebo viac obrázkov. Obrázky sa zobrazia trvalo pod oznamami:</p>
+
+        <div style="margin-bottom: 12px;">
+          <label for="menoZiaka" style="display:block; margin-bottom:6px; font-weight:600;">Meno žiaka</label>
+          <input type="text" id="menoZiaka" placeholder="Zadajte meno žiaka" style="width:100%; max-width:420px; padding:10px 12px; border:1px solid #d0d7de; border-radius:6px; font-size:14px;">
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          <label for="popisObrazku" style="display:block; margin-bottom:6px; font-weight:600;">Popis</label>
+          <textarea id="popisObrazku" rows="3" placeholder="Krátky popis obrázka" style="width:100%; max-width:420px; padding:10px 12px; border:1px solid #d0d7de; border-radius:6px; font-size:14px; resize:vertical;"></textarea>
+        </div>
+
         <input type="file" id="obrazokInput" accept="image/*" multiple onchange="zobrazObrazky(event)">
+
         <div class="image-actions">
           <button type="button" class="secondary-btn" onclick="ulozObrazky()">Uložiť obrázky</button>
           <button type="button" class="danger-btn" onclick="vymazObrazky()">Zmazať obrázky</button>
         </div>
+
         <div id="imagePreview" class="image-preview"></div>
       </div>
 
@@ -135,15 +151,24 @@
       const files = Array.from(event.target.files || []);
       if (!files.length) return;
 
+      const menoZiaka = document.getElementById("menoZiaka").value.trim();
+      const popis = document.getElementById("popisObrazku").value.trim();
+
       const promises = files.map(file => new Promise((resolve) => {
         const reader = new FileReader();
-        reader.onload = (e) => resolve({ name: file.name, dataUrl: e.target.result });
+        reader.onload = (e) => resolve({
+          name: file.name,
+          dataUrl: e.target.result,
+          menoZiaka,
+          popis
+        });
         reader.readAsDataURL(file);
       }));
 
       Promise.all(promises).then(results => {
         nahodeneObrazky = nahodeneObrazky.concat(results);
         vykresliObrazky();
+        ulozObrazky();
       });
     }
 
@@ -154,34 +179,52 @@
       oznamy.innerHTML = "";
 
       nahodeneObrazky.forEach((item, index) => {
-        const wrap = document.createElement("div");
-        wrap.style.display = "flex";
-        wrap.style.flexDirection = "column";
-        wrap.style.gap = "8px";
+        const itemBox = document.createElement("div");
+        itemBox.className = "image-item";
 
         const img = document.createElement("img");
         img.src = item.dataUrl;
         img.alt = item.name || `Obrázok ${index + 1}`;
 
         const caption = document.createElement("div");
-        caption.style.fontSize = "13px";
-        caption.style.color = "#57606a";
-        caption.textContent = item.name || `Obrázok ${index + 1}`;
+        caption.className = "image-caption";
+        caption.innerHTML = `<strong>${item.menoZiaka || "Neznámy žiak"}</strong><br>${item.popis || "Bez popisu"}`;
 
-        wrap.appendChild(img);
-        wrap.appendChild(caption);
-        preview.appendChild(wrap);
+        const actions = document.createElement("div");
+        actions.className = "image-actions";
 
+        const deleteBtn = document.createElement("button");
+        deleteBtn.type = "button";
+        deleteBtn.className = "danger-btn";
+        deleteBtn.textContent = "Zmazať";
+        deleteBtn.onclick = () => {
+          nahodeneObrazky.splice(index, 1);
+          ulozObrazky();
+          vykresliObrazky();
+        };
+
+        actions.appendChild(deleteBtn);
+        itemBox.appendChild(img);
+        itemBox.appendChild(caption);
+        itemBox.appendChild(actions);
+        preview.appendChild(itemBox);
+
+        const oznamItem = document.createElement("div");
+        oznamItem.className = "image-item";
         const oznamImg = document.createElement("img");
         oznamImg.src = item.dataUrl;
         oznamImg.alt = item.name || `Obrázok ${index + 1}`;
-        oznamy.appendChild(oznamImg);
+        const oznamCaption = document.createElement("div");
+        oznamCaption.className = "image-caption";
+        oznamCaption.innerHTML = `<strong>${item.menoZiaka || "Neznámy žiak"}</strong><br>${item.popis || "Bez popisu"}`;
+        oznamItem.appendChild(oznamImg);
+        oznamItem.appendChild(oznamCaption);
+        oznamy.appendChild(oznamItem);
       });
     }
 
     function ulozObrazky() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(nahodeneObrazky));
-      alert("Obrázky boli uložené do prehliadača.");
     }
 
     function nacitajObrazkyZoStorage() {
