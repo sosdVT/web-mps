@@ -26,6 +26,8 @@
     .secondary-btn:hover { background: #57606a; }
     .danger-btn { background: #cf222e; }
     .danger-btn:hover { background: #a40e26; }
+    .posted-image-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 14px; }
+    .posted-image-grid img { width: 100%; height: auto; border-radius: 8px; border: 1px solid #d0d7de; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
   </style>
 </head>
 <body>
@@ -62,6 +64,7 @@
     <div class="card">
       <h2>📢 Verejné oznamy</h2>
       <p>Vitajte na informačnej stránke odboru. Učebné texty, podklady a zadania cvičení sú prístupné v chránenej zóne nižšie.</p>
+      <div id="oznamyObrazky" class="posted-image-grid"></div>
     </div>
 
     <div class="card">
@@ -81,7 +84,6 @@
       </form>
     </div>
 
-    <!-- Prihlasovací blok -->
     <div class="card" id="login-box">
       <h2>🔒 Vstup do študijnej zóny (pre žiakov)</h2>
       <p>Pre zobrazenie zadaní zadajte prístupové heslo skupiny:</p>
@@ -90,7 +92,6 @@
       <div id="chybaMsg" class="error">❌ Nesprávne heslo, skúste znova.</div>
     </div>
 
-    <!-- Skrytý obsah po zadaní hesla -->
     <div class="card" id="chraneny-obsah" style="display: none;">
       <h2>📂 Študijné materiály a zadania cvičení</h2>
       <p><strong>Úspešne odomknuté!</strong> Tu sú vaše aktuálne zadania:</p>
@@ -102,7 +103,7 @@
 
       <div style="margin-top: 20px; padding: 16px; border: 1px dashed #d0d7de; border-radius: 8px; background: #f6f8fa;">
         <h3 style="margin-top: 0;">🖼️ Vložiť obrázky</h3>
-        <p style="margin-top: 0;">Vyberte jeden alebo viac obrázkov, ktoré sa zobrazia na stránke:</p>
+        <p style="margin-top: 0;">Vyberte jeden alebo viac obrázkov, ktoré sa zobrazia pod oznamami:</p>
         <input type="file" id="obrazokInput" accept="image/*" multiple onchange="zobrazObrazky(event)">
         <div class="image-actions">
           <button type="button" class="secondary-btn" onclick="ulozObrazky()">Uložiť obrázky</button>
@@ -148,7 +149,9 @@
 
     function vykresliObrazky() {
       const preview = document.getElementById("imagePreview");
+      const oznamy = document.getElementById("oznamyObrazky");
       preview.innerHTML = "";
+      oznamy.innerHTML = "";
 
       nahodeneObrazky.forEach((item, index) => {
         const wrap = document.createElement("div");
@@ -168,6 +171,11 @@
         wrap.appendChild(img);
         wrap.appendChild(caption);
         preview.appendChild(wrap);
+
+        const oznamImg = document.createElement("img");
+        oznamImg.src = item.dataUrl;
+        oznamImg.alt = item.name || `Obrázok ${index + 1}`;
+        oznamy.appendChild(oznamImg);
       });
     }
 
@@ -186,6 +194,7 @@
       nahodeneObrazky = [];
       localStorage.removeItem(STORAGE_KEY);
       document.getElementById("imagePreview").innerHTML = "";
+      document.getElementById("oznamyObrazky").innerHTML = "";
       const input = document.getElementById("obrazokInput");
       if (input) input.value = "";
     }
