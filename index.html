@@ -40,6 +40,7 @@
       <h1>Odbor: Mechanik počítačových sietí</h1>
       <p>Informačný portál a zadania pre študijnú skupinu</p>
     </header>
+
     <div class="card">
       <h2>📋 Dochádzka žiakov</h2>
       <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
@@ -64,6 +65,7 @@
         </tbody>
       </table>
     </div>
+
     <div class="card">
       <h2>📢 Verejné oznamy</h2>
       <p>Vitajte na informačnej stránke odboru. Učebné texty, podklady a zadania cvičení sú prístupné všetkým návštevníkom stránky.</p>
@@ -77,12 +79,10 @@
           <label for="email" style="display:block; margin-bottom:6px; font-weight:600;">Email</label>
           <input type="email" id="email" name="email" placeholder="napr. student@skola.sk" required style="width:100%; max-width:420px; padding:10px 12px; border:1px solid #d0d7de; border-radius:6px; font-size:14px;">
         </div>
-
         <div style="margin-bottom: 12px;">
           <label for="sprava" style="display:block; margin-bottom:6px; font-weight:600;">Správa</label>
           <textarea id="sprava" name="sprava" rows="5" placeholder="Napíšte vašu správu..." required style="width:100%; max-width:420px; padding:10px 12px; border:1px solid #d0d7de; border-radius:6px; font-size:14px; resize:vertical;"></textarea>
         </div>
-
         <button type="submit">Odoslať</button>
       </form>
     </div>
@@ -107,24 +107,19 @@
       <div style="margin-top: 20px; padding: 16px; border: 1px dashed #d0d7de; border-radius: 8px; background: #f6f8fa;">
         <h3 style="margin-top: 0;">🖼️ Pridať obrázok žiaka</h3>
         <p style="margin-top: 0;">Vyplň meno, popis a vyber jeden alebo viac obrázkov. Obrázky sa zobrazia trvalo pod oznamami:</p>
-
         <div style="margin-bottom: 12px;">
           <label for="menoZiaka" style="display:block; margin-bottom:6px; font-weight:600;">Meno žiaka</label>
           <input type="text" id="menoZiaka" placeholder="Zadajte meno žiaka" style="width:100%; max-width:420px; padding:10px 12px; border:1px solid #d0d7de; border-radius:6px; font-size:14px;">
         </div>
-
         <div style="margin-bottom: 12px;">
           <label for="popisObrazku" style="display:block; margin-bottom:6px; font-weight:600;">Popis</label>
           <textarea id="popisObrazku" rows="3" placeholder="Krátky popis obrázka" style="width:100%; max-width:420px; padding:10px 12px; border:1px solid #d0d7de; border-radius:6px; font-size:14px; resize:vertical;"></textarea>
         </div>
-
         <input type="file" id="obrazokInput" accept="image/*" multiple onchange="zobrazObrazky(event)">
-
         <div class="image-actions">
           <button type="button" class="secondary-btn" onclick="ulozObrazky()">Uložiť obrázky</button>
           <button type="button" class="danger-btn" onclick="vymazObrazky()">Zmazať obrázky</button>
         </div>
-
         <div id="imagePreview" class="image-preview"></div>
       </div>
 
@@ -141,7 +136,6 @@
       if (heslo.trim().toLowerCase() === "mps2026") {
         document.getElementById("login-box").style.display = "none";
         document.getElementById("chraneny-obsah").style.display = "block";
-        nacitajObrazkyZoStorage();
       } else {
         document.getElementById("chybaMsg").style.display = "block";
       }
@@ -222,6 +216,8 @@
       const input = document.getElementById("obrazokInput");
       if (input) input.value = "";
     }
+
+    nacitajObrazkyZoStorage();
   </script>
 
 </body>
