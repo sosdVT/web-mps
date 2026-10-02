@@ -150,49 +150,38 @@
     function zobrazObrazky(event) {
       const files = Array.from(event.target.files || []);
       if (!files.length) return;
-
       const menoZiaka = document.getElementById("menoZiaka").value.trim();
       const popis = document.getElementById("popisObrazku").value.trim();
-
       const promises = files.map(file => new Promise((resolve) => {
         const reader = new FileReader();
-        reader.onload = (e) => resolve({
-          name: file.name,
-          dataUrl: e.target.result,
-          menoZiaka,
-          popis
-        });
+        reader.onload = (e) => resolve({ name: file.name, dataUrl: e.target.result, menoZiaka, popis });
         reader.readAsDataURL(file);
       }));
-
       Promise.all(promises).then(results => {
         nahodeneObrazky = nahodeneObrazky.concat(results);
-        vykresliObrazky();
         ulozObrazky();
+        vykresliObrazky();
       });
     }
 
-    function vykresliObrazky() {
-      const preview = document.getElementById("imagePreview");
-      const oznamy = document.getElementById("oznamyObrazky");
-      preview.innerHTML = "";
-      oznamy.innerHTML = "";
+    function vytvorKartu(item, index, withDelete = false) {
+      const itemBox = document.createElement("div");
+      itemBox.className = "image-item";
 
-      nahodeneObrazky.forEach((item, index) => {
-        const itemBox = document.createElement("div");
-        itemBox.className = "image-item";
+      const img = document.createElement("img");
+      img.src = item.dataUrl;
+      img.alt = item.name || `Obrázok ${index + 1}`;
 
-        const img = document.createElement("img");
-        img.src = item.dataUrl;
-        img.alt = item.name || `Obrázok ${index + 1}`;
+      const caption = document.createElement("div");
+      caption.className = "image-caption";
+      caption.innerHTML = `<strong>${item.menoZiaka || "Neznámy žiak"}</strong><br>${item.popis || "Bez popisu"}`;
 
-        const caption = document.createElement("div");
-        caption.className = "image-caption";
-        caption.innerHTML = `<strong>${item.menoZiaka || "Neznámy žiak"}</strong><br>${item.popis || "Bez popisu"}`;
+      itemBox.appendChild(img);
+      itemBox.appendChild(caption);
 
+      if (withDelete) {
         const actions = document.createElement("div");
         actions.className = "image-actions";
-
         const deleteBtn = document.createElement("button");
         deleteBtn.type = "button";
         deleteBtn.className = "danger-btn";
@@ -202,24 +191,22 @@
           ulozObrazky();
           vykresliObrazky();
         };
-
         actions.appendChild(deleteBtn);
-        itemBox.appendChild(img);
-        itemBox.appendChild(caption);
         itemBox.appendChild(actions);
-        preview.appendChild(itemBox);
+      }
 
-        const oznamItem = document.createElement("div");
-        oznamItem.className = "image-item";
-        const oznamImg = document.createElement("img");
-        oznamImg.src = item.dataUrl;
-        oznamImg.alt = item.name || `Obrázok ${index + 1}`;
-        const oznamCaption = document.createElement("div");
-        oznamCaption.className = "image-caption";
-        oznamCaption.innerHTML = `<strong>${item.menoZiaka || "Neznámy žiak"}</strong><br>${item.popis || "Bez popisu"}`;
-        oznamItem.appendChild(oznamImg);
-        oznamItem.appendChild(oznamCaption);
-        oznamy.appendChild(oznamItem);
+      return itemBox;
+    }
+
+    function vykresliObrazky() {
+      const preview = document.getElementById("imagePreview");
+      const oznamy = document.getElementById("oznamyObrazky");
+      preview.innerHTML = "";
+      oznamy.innerHTML = "";
+
+      nahodeneObrazky.forEach((item, index) => {
+        preview.appendChild(vytvorKartu(item, index, true));
+        oznamy.appendChild(vytvorKartu(item, index, false));
       });
     }
 
