@@ -19,8 +19,13 @@
     ul { padding-left: 20px; line-height: 1.6; }
     li { margin-bottom: 6px; }
     input[type="file"] { display: block; margin: 12px 0; }
-    .image-preview { margin-top: 16px; max-width: 100%; display: none; }
-    .image-preview img { max-width: 100%; border: 1px solid #d0d7de; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .image-preview { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 12px; }
+    .image-preview img { max-width: 100%; width: 220px; border: 1px solid #d0d7de; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .image-actions { margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .secondary-btn { background: #6e7781; }
+    .secondary-btn:hover { background: #57606a; }
+    .danger-btn { background: #cf222e; }
+    .danger-btn:hover { background: #a40e26; }
   </style>
 </head>
 <body>
@@ -96,12 +101,14 @@
       </ul>
 
       <div style="margin-top: 20px; padding: 16px; border: 1px dashed #d0d7de; border-radius: 8px; background: #f6f8fa;">
-        <h3 style="margin-top: 0;">🖼️ Vložiť obrázok</h3>
-        <p style="margin-top: 0;">Vyberte obrázok, ktorý sa hneď zobrazí na stránke:</p>
-        <input type="file" id="obrazokInput" accept="image/*" onchange="zobrazObrazok(event)">
-        <div id="imagePreview" class="image-preview">
-          <img id="previewImg" alt="Nahraný obrázok">
+        <h3 style="margin-top: 0;">🖼️ Vložiť obrázky</h3>
+        <p style="margin-top: 0;">Vyberte jeden alebo viac obrázkov, ktoré sa zobrazia na stránke:</p>
+        <input type="file" id="obrazokInput" accept="image/*" multiple onchange="zobrazObrazky(event)">
+        <div class="image-actions">
+          <button type="button" class="secondary-btn" onclick="ulozObrazky()">Uložiť obrázky</button>
+          <button type="button" class="danger-btn" onclick="vymazObrazky()">Zmazať obrázky</button>
         </div>
+        <div id="imagePreview" class="image-preview"></div>
       </div>
 
       <p style="margin-top: 15px; font-size: 13px; color: #57606a;">Poznámka: Vypracované protokoly nahrávajte podľa pokynov na cvičení.</p>
@@ -109,29 +116,78 @@
   </div>
 
   <script>
+    const STORAGE_KEY = "mps_obrazky";
+    let nahodeneObrazky = [];
+
     function skontrolujHeslo() {
       const heslo = document.getElementById("hesloInput").value;
-      // Predvolené heslo je mps2026 (môžete si ho kedykoľvek zmeniť)
       if (heslo.trim().toLowerCase() === "mps2026") {
         document.getElementById("login-box").style.display = "none";
         document.getElementById("chraneny-obsah").style.display = "block";
+        nacitajObrazkyZoStorage();
       } else {
         document.getElementById("chybaMsg").style.display = "block";
       }
     }
 
-    function zobrazObrazok(event) {
-      const file = event.target.files[0];
-      if (!file) return;
+    function zobrazObrazky(event) {
+      const files = Array.from(event.target.files || []);
+      if (!files.length) return;
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const preview = document.getElementById("imagePreview");
-        const img = document.getElementById("previewImg");
-        img.src = e.target.result;
-        preview.style.display = "block";
-      };
-      reader.readAsDataURL(file);
+      const promises = files.map(file => new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve({ name: file.name, dataUrl: e.target.result });
+        reader.readAsDataURL(file);
+      }));
+
+      Promise.all(promises).then(results => {
+        nahodeneObrazky = nahodeneObrazky.concat(results);
+        vykresliObrazky();
+      });
+    }
+
+    function vykresliObrazky() {
+      const preview = document.getElementById("imagePreview");
+      preview.innerHTML = "";
+
+      nahodeneObrazky.forEach((item, index) => {
+        const wrap = document.createElement("div");
+        wrap.style.display = "flex";
+        wrap.style.flexDirection = "column";
+        wrap.style.gap = "8px";
+
+        const img = document.createElement("img");
+        img.src = item.dataUrl;
+        img.alt = item.name || `Obrázok ${index + 1}`;
+
+        const caption = document.createElement("div");
+        caption.style.fontSize = "13px";
+        caption.style.color = "#57606a";
+        caption.textContent = item.name || `Obrázok ${index + 1}`;
+
+        wrap.appendChild(img);
+        wrap.appendChild(caption);
+        preview.appendChild(wrap);
+      });
+    }
+
+    function ulozObrazky() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(nahodeneObrazky));
+      alert("Obrázky boli uložené do prehliadača.");
+    }
+
+    function nacitajObrazkyZoStorage() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      nahodeneObrazky = saved ? JSON.parse(saved) : [];
+      vykresliObrazky();
+    }
+
+    function vymazObrazky() {
+      nahodeneObrazky = [];
+      localStorage.removeItem(STORAGE_KEY);
+      document.getElementById("imagePreview").innerHTML = "";
+      const input = document.getElementById("obrazokInput");
+      if (input) input.value = "";
     }
   </script>
 
