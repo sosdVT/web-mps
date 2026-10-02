@@ -18,6 +18,9 @@
     .error { color: #cf222e; margin-top: 10px; font-size: 14px; display: none; }
     ul { padding-left: 20px; line-height: 1.6; }
     li { margin-bottom: 6px; }
+    input[type="file"] { display: block; margin: 12px 0; }
+    .image-preview { margin-top: 16px; max-width: 100%; display: none; }
+    .image-preview img { max-width: 100%; border: 1px solid #d0d7de; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
   </style>
 </head>
 <body>
@@ -91,6 +94,16 @@
         <li><strong>Zadanie 2:</strong> Konfigurácia prepínačov a VLAN v Cisco Packet Tracer</li>
         <li><strong>Zadanie 3:</strong> Príprava a verzovanie webovej prezentácie na GitHube</li>
       </ul>
+
+      <div style="margin-top: 20px; padding: 16px; border: 1px dashed #d0d7de; border-radius: 8px; background: #f6f8fa;">
+        <h3 style="margin-top: 0;">🖼️ Vložiť obrázok</h3>
+        <p style="margin-top: 0;">Vyberte obrázok, ktorý sa hneď zobrazí na stránke:</p>
+        <input type="file" id="obrazokInput" accept="image/*" onchange="zobrazObrazok(event)">
+        <div id="imagePreview" class="image-preview">
+          <img id="previewImg" alt="Nahraný obrázok">
+        </div>
+      </div>
+
       <p style="margin-top: 15px; font-size: 13px; color: #57606a;">Poznámka: Vypracované protokoly nahrávajte podľa pokynov na cvičení.</p>
     </div>
   </div>
@@ -105,6 +118,20 @@
       } else {
         document.getElementById("chybaMsg").style.display = "block";
       }
+    }
+
+    function zobrazObrazok(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const preview = document.getElementById("imagePreview");
+        const img = document.getElementById("previewImg");
+        img.src = e.target.result;
+        preview.style.display = "block";
+      };
+      reader.readAsDataURL(file);
     }
   </script>
 
