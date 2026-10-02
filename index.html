@@ -40,7 +40,7 @@
       <h1>Odbor: Mechanik počítačových sietí</h1>
       <p>Informačný portál a zadania pre študijnú skupinu</p>
     </header>
-<div class="card">
+    <div class="card">
       <h2>📋 Dochádzka žiakov</h2>
       <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
         <thead>
@@ -167,18 +167,14 @@
     function vytvorKartu(item, index, withDelete = false) {
       const itemBox = document.createElement("div");
       itemBox.className = "image-item";
-
       const img = document.createElement("img");
       img.src = item.dataUrl;
       img.alt = item.name || `Obrázok ${index + 1}`;
-
       const caption = document.createElement("div");
       caption.className = "image-caption";
       caption.innerHTML = `<strong>${item.menoZiaka || "Neznámy žiak"}</strong><br>${item.popis || "Bez popisu"}`;
-
       itemBox.appendChild(img);
       itemBox.appendChild(caption);
-
       if (withDelete) {
         const actions = document.createElement("div");
         actions.className = "image-actions";
@@ -194,7 +190,6 @@
         actions.appendChild(deleteBtn);
         itemBox.appendChild(actions);
       }
-
       return itemBox;
     }
 
@@ -203,7 +198,6 @@
       const oznamy = document.getElementById("oznamyObrazky");
       preview.innerHTML = "";
       oznamy.innerHTML = "";
-
       nahodeneObrazky.forEach((item, index) => {
         preview.appendChild(vytvorKartu(item, index, true));
         oznamy.appendChild(vytvorKartu(item, index, false));
